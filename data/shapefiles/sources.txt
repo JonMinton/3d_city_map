@@ -1,0 +1,17 @@
+http://www.mapcruzin.com/free-scotland-arcgis-maps-shapefiles.htm
+
+contains - 
+scotland buildings
+scotland natural features
+scotland places
+scotland points of interest
+scotland railways
+scotland roads
+scotland waterways
+
+
+
+http://www.bcomm-scotland.independent.gov.uk/6th_westminster/electoratedata/postcode_shapefiles/
+
+contains -
+Glasgow City 

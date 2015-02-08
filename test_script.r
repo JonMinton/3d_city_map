@@ -79,35 +79,38 @@ surface3d(x=interpolated$x, y = interpolated$y, z = interpolated$z,
 
 # Now Glasgow singular
 
-glasgow_single <- readShapePoly(
-    fn="data/clipped/glasgow_single"
+glasgow_many_areas <- readOGR(
+   dsn="data/shapefiles/Glasgow_City",
+   "Glasgow_elect_codes_2010"
 )
 
-points_to_check <- expand.grid(
-    x=interpolated$x,
-    y=interpolated$y
+glasgow_single_area <- gUnionCascaded(glasgow_many_areas)
+
+points_to_check <- as(raster(extent(glasgow_single_area), nrows=200, ncols=200), "SpatialPoints")
+proj4string(points_to_check) <- proj4string(glasgow_single_area)
+
+point_within <- gWithin(points_to_check, glasgow_single_area, byid=T)
+
+plot(glasgow_single_area)
+points(points_to_check, col=1+point_within)
+
+vals <- data.frame(
+    x=points_to_check@coords[,"x"],
+    y=points_to_check@coords[,"y"],
+    z=point_within[1,]
     )
+vals_matrix <- vals %>% spread(key=y, value=z)
+rownames(vals_matrix) <- vals_matrix$x
+vals_matrix <- vals_matrix[,-1]
+vals_matrix <- as.matrix(vals_matrix)
 
-fn <- function(X){
-    this_coord <- data.frame(lon=X["x"], lat=X["y"])
-    this_point <- SpatialPoints(this_coord)
-    out <- gContains(glasgow_single, this_point)
-    out <- data.frame(x=X["x"], y=X["y"], val=out)
-    return(out)
-}
-
-vals <- adply(points_to_check, 1, fn, .progress="text")
-vals$val <- as.numeric(vals$val)
-
-val_list <- list(
-    x=interpolated$x,
-    y=interpolated$y,
-    z= vals %>% tbl_df() %>% spread(key=y, value=val) %>% select(-x) %>% as.matrix()
-    )
-dimnames(val_list$z) <- NULL
-
-
-surface3d(x=val_list$x, y = val_list$y, z = val_list$z * 100,
+vals_list <- list(
+    x=rownames(vals_matrix) %>% as.numeric(),
+    y=colnames(vals_matrix) %>% as.numeric(),
+    z=vals_matrix %>% as.numeric()
+)
+dimnames(vals_list$z) <- NULL
+surface3d(x=vals_list$x, y = vals_list$y, z = vals_list$z * 3000,
           axes=F, box=F, col="white"
 )
 
@@ -123,10 +126,35 @@ surface3d(x=masked_list$x, y = masked_list$y, z = masked_list$z,
 )
 
 
-road_lines <- readShapeLines(
-    "data/shapefiles/major-roads-link-network-2013/Major_roads_link_network2013"
+road_lines <-  readOGR(
+    dsn="data/shapefiles/major-roads-link-network-2013",
+    "Major_roads_link_network2013"
+)
+proj4string(road_lines) <- proj4string(glasgow_single_area)
+
+road_lines_in_glasgow <- gIntersection(road_lines, glasgow_single_area)
+
+tmp <- raster(road_lines_in_glasgow, nrows=200, ncols=200)
+
+tmp2 <- rasterize(
+    x=road_lines,
+    y=tmp
     )
 
-road_lines_in_glasgow <- gIntersection(road_lines, glasgow_single)
 
+## Required packages 
+library(rgdal)
+library(raster)  ## For example polygon & functions used to make example points
+library(rgeos)   
 
+## Reproducible example
+poly <- readOGR(system.file("external", package="raster"), "lux")[1,]
+points <- as(raster(extent(poly)), "SpatialPoints")
+proj4string(points) <- proj4string(poly)
+
+## Test which points fall within polygon 
+win <- gWithin(points, poly, byid=TRUE)
+
+## Check that it works
+plot(poly)
+points(points, col=1+win)

@@ -36,7 +36,6 @@ proj4string(glasgow_building_heights)
 proj4string(glasgow_building_heights) <- proj4string(glasgow_city)
 proj4string(glasgow_building_heights)
 
-# Prices is not correct here; it needs to be merged again from the source file
 
 # Now Glasgow singular
 

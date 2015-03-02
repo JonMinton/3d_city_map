@@ -10,7 +10,7 @@ require(dplyr)
 # median house prices in 2010
 data_house <- source_DropboxData(
     file="house_sales_and_prices.csv",
-    key="pypifzbldk1wa6a"
+    key="uvttugwad87uleb"
     ) %>% tbl_df()
 
 

@@ -15,7 +15,7 @@ data_house <- source_DropboxData(
 
 
 data_house <- data_house %>% 
-    filter(year>=2007 & year <=2010) %>%
+    filter(year>=2005 & year <=2010) %>%
     select(datazone, year, median_price=HO.hpricemedian, number_of_sales=HO.hsalesno)
 
 # Want a weighted average of median prices by number of sales
@@ -27,7 +27,7 @@ data_house_weighted$avg_median_price[is.na(data_house_weighted$avg_median_price)
 
 
 write.csv(data_house_weighted,
-          file="data/attributes/weighted_median_house_prices_2007_2010.csv", 
+          file="data/attributes/weighted_median_house_prices_2005_2010.csv", 
           row.names=F
           )
 

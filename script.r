@@ -20,7 +20,7 @@ require(r2stl)
 require(readbitmap)
 require(lattice)
 require(latticeExtra)
-
+require(readbitmap)
 # 19-3-2015
 
 # The aim now is to simply produce a series of greyscale images on the same scale, 
@@ -118,6 +118,114 @@ dir.create("stls")
 r2stl(x=1:nrow(btmp), y=1:ncol(btmp), z=btmp, z.expand=T, file="stls/hprice_rank.stl")
 
 
+# Avg house prices using long-term relative averages ----------------------
+
+# Need to look at the local authority of glasgow
+
+dz_to_la <- read.csv("data/la_to_dz.csv", header=T) %>%
+    tbl_df
+
+dzs_in_gcity <- dz_to_la %>%
+    filter(local_authority=="Glasgow City") 
+
+dz_hprices <- read.csv("data/attributes/long_term_relative_house_prices.csv") %>%
+    tbl_df
+
+dz_hprices_gcity <- dz_hprices %>%
+    inner_join(dzs_in_gcity) 
+
+rgdal::ogrInfo("data/shapefiles/scotland_2001_datazones", "scotland_dz_2001")
+scot_2001_dz_shp <- rgdal::readOGR(
+    "data/shapefiles/scotland_2001_datazones", "scotland_dz_2001"
+)
+
+glas_2001_dz_shp <- scot_2001_dz_shp[scot_2001_dz_shp$zonecode %in% dzs_in_gcity$datazone,] 
+
+# attach house prices
+glas_2001_dz_shp@data <- merge(glas_2001_dz_shp@data, dz_hprices_gcity, by.x="zonecode", by.y="datazone")
+glas_2001_dz_shp@data <- glas_2001_dz_shp@data[c("zonecode", "gid","ons_code", "label", "lt_mean", "lt_med")]
+
+# Now to go back and use code for extracting road network
+scotland_road <- rgdal::readOGR(    
+    "data/shapefiles/scotland-roads-shape", "roads"
+)
+
+# transform projection system
+
+scotland_road_reprojected <- spTransform(scotland_road, CRS(proj4string(glas_2001_dz_shp)))
+# Robin Lovelace function
+
+gClip <- function(shp, bb){
+    if(class(bb) == "matrix") b_poly <- as(extent(as.vector(t(bb))), "SpatialPolygons")
+    else b_poly <- as(extent(bb), "SpatialPolygons")
+    gIntersection(shp, b_poly, byid = T)
+}
+
+
+scotland_road_reprojected_clipped <- gClip(shp=scotland_road_reprojected, bb=bbox(glas_2001_dz_shp))
+
+# trying to add as layer within spplot
+
+bmp("bitmaps/rel_longterm_hp_mean_glasgow.bmp", height=1000, width=1310)
+spplot(glas_2001_dz_shp, "lt_mean",
+       col.regions=rev(gray(seq(0, 0.95, 0.01))),
+       col=NA,
+       colorkey=FALSE,
+       par.settings = list(
+           axis.line = list(col = 'transparent'),
+           panel.background=list(col=gray(0.95))
+       )
+) + latticeExtra::layer(
+    sp.lines(scotland_road_reprojected_clipped, col = "white", alpha=0.1) 
+)
+dev.off()    
+
+bmp("bitmaps/rel_longterm_hp_median_glasgow.bmp", height=1000, width=1310)
+spplot(glas_2001_dz_shp, "lt_med",
+       col.regions=rev(gray(seq(0, 0.95, 0.01))),
+       col=NA,
+       colorkey=FALSE,
+       par.settings = list(
+           axis.line = list(col = 'transparent'),
+           panel.background=list(col=gray(0.95))
+       )
+) + latticeExtra::layer(
+    sp.lines(scotland_road_reprojected_clipped, col = "white", alpha=0.1) 
+)
+dev.off() 
+
+
+btmp <- read.bitmap(f="bitmaps/rel_longterm_hp_mean_glasgow.bmp")
+btmp <- btmp / max(btmp)
+btmp <- 1 - btmp
+
+rows_are_zero <- apply(btmp, 1, function(x) sum(x)==0)
+cols_are_zero <- apply(btmp, 2, function(x) sum(x)==0)
+btmp <- btmp[!rows_are_zero,!cols_are_zero]
+
+
+surface3d(x=1:nrow(btmp), y=1:ncol(btmp), z=btmp*100, col="lightgrey")
+
+
+#persp3d(btmp, col="grey", zlim=c(0,1))
+dir.create("stls")
+r2stl(x=1:nrow(btmp), y=1:ncol(btmp), z=btmp, z.expand=T, file="stls/lt_hp_mean.stl")
+
+
+btmp <- read.bitmap(f="bitmaps/rel_longterm_hp_median_glasgow.bmp")
+btmp <- btmp / max(btmp)
+btmp <- 1 - btmp
+rows_are_zero <- apply(btmp, 1, function(x) sum(x)==0)
+cols_are_zero <- apply(btmp, 2, function(x) sum(x)==0)
+btmp <- btmp[!rows_are_zero,!cols_are_zero]
+
+
+surface3d(x=1:nrow(btmp), y=1:ncol(btmp), z=btmp*100, col="lightgrey")
+
+
+#persp3d(btmp, col="grey", zlim=c(0,1))
+dir.create("stls")
+r2stl(x=1:nrow(btmp), y=1:ncol(btmp), z=btmp, z.expand=T, file="stls/lt_hp_median.stl")
 
 #######
 

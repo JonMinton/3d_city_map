@@ -411,3 +411,110 @@ surface3d(x=1:nrow(btmp), y=1:ncol(btmp), z=btmp*100, col="lightgrey")
 #persp3d(btmp, col="grey", zlim=c(0,1))
 dir.create("stls")
 r2stl(x=1:nrow(btmp), y=1:ncol(btmp), z=btmp, z.expand=T, file="stls/child_pov_2010.stl")
+
+
+# Life expectancy ---------------------------------------------------------
+
+
+#Life expectancy is available only at IG level rather than DZ level
+
+
+# source: https://data.glasgow.gov.uk/dataset/life-expectancy-figures-in-males/
+# resource/c452a10e-c03a-443c-ad8e-2881862830b5
+
+male_le <- read.csv("data/attributes/life-exp-males-2005-2009.csv") %>%
+    tbl_df 
+
+male_le <- male_le  %>% select(intermed=Intermediate.Geography.Code, e0_male=EOLAB)
+
+dz_to_la <- read.csv("data/la_to_dz.csv", header=T) %>%
+    tbl_df
+
+dzs_in_gcity <- dz_to_la %>%
+    filter(local_authority=="Glasgow City") 
+
+big_link <- read.csv("data/latestpcinfowithlinkpc.csv") %>%
+    tbl_df
+
+dz_ig_link <- big_link %>% 
+    select(datazone=Datazone, intermed=Intermed)
+rm(big_link)
+
+igs_in_gcity <- dzs_in_gcity %>%
+    left_join(dz_ig_link) 
+
+ig_e0male_gcity <- male_le %>%
+    inner_join(igs_in_gcity)%>%
+    select(intermed, e0_male) %>%
+    unique
+
+rgdal::ogrInfo("data/shapefiles/scotland_2001_intermed", "scotland_igeog_2001")
+scot_2001_ig_shp <- rgdal::readOGR(
+    "data/shapefiles/scotland_2001_intermed", "scotland_igeog_2001"
+)
+
+
+glas_2001_ig_shp <- scot_2001_ig_shp[scot_2001_ig_shp$zonecode %in% igs_in_gcity$intermed,] 
+
+# attach house prices
+glas_2001_ig_shp@data <- merge(glas_2001_ig_shp@data, ig_e0male_gcity, by.x="zonecode", by.y="intermed")
+glas_2001_ig_shp@data <- glas_2001_ig_shp@data[c("zonecode", "gid", "label", "e0_male")]
+
+
+spplot(glas_2001_ig_shp, "e0_male",
+       col.regions=rev(gray(seq(0, 1, 0.01))),
+       col=NA,
+       colorkey=FALSE,
+       par.settings = list(axis.line = list(col = 'transparent'))
+)
+
+# Now to go back and use code for extracting road network
+scotland_road <- rgdal::readOGR(    
+    "data/shapefiles/scotland-roads-shape", "roads"
+)
+
+# transform projection system
+
+scotland_road_reprojected <- spTransform(scotland_road, CRS(proj4string(glas_2001_dz_shp)))
+# Robin Lovelace function
+
+gClip <- function(shp, bb){
+    if(class(bb) == "matrix") b_poly <- as(extent(as.vector(t(bb))), "SpatialPolygons")
+    else b_poly <- as(extent(bb), "SpatialPolygons")
+    gIntersection(shp, b_poly, byid = T)
+}
+
+
+scotland_road_reprojected_clipped <- gClip(shp=scotland_road_reprojected, bb=bbox(glas_2001_ig_shp))
+
+# trying to add as layer within spplot
+
+bmp("bitmaps/e0_male_ig_glasgow.bmp", height=1000, width=1310)
+spplot(glas_2001_ig_shp, "e0_male",
+       col.regions=rev(gray(seq(0, 0.95, 0.01))),
+       col=NA,
+       colorkey=FALSE,
+       par.settings = list(
+           axis.line = list(col = 'transparent'),
+           panel.background=list(col=gray(0.95))
+       )
+) + latticeExtra::layer(
+    sp.lines(scotland_road_reprojected_clipped, col = "white", alpha=0.1) 
+)
+dev.off()    
+
+
+btmp <- read.bitmap(f="bitmaps/e0_male_ig_glasgow.bmp")
+btmp <- btmp / max(btmp)
+btmp <- 1 - btmp
+
+# this removes the edges 
+rows_are_zero <- apply(btmp, 1, function(x) sum(x)==0)
+cols_are_zero <- apply(btmp, 2, function(x) sum(x)==0)
+btmp <- btmp[!rows_are_zero,!cols_are_zero]
+
+surface3d(x=1:nrow(btmp), y=1:ncol(btmp), z=btmp*100, col="lightgrey")
+
+dir.create("stls")
+r2stl(x=1:nrow(btmp), y=1:ncol(btmp), z=btmp, z.expand=T, file="stls/e0_male_intermed.stl")
+

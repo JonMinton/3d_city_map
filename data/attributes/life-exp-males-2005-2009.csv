@@ -1,0 +1,134 @@
+Intermediate Geography Code,Intermediate Geography Name,EOLAB,Lwr95%CI,Upp95%CI,lngthofCI
+S02000584,Carmunnock South,69.2,66,72.5,6.5
+S02000585,Glenwood South,68.3,66.2,70.3,4.2
+S02000586,Darnley West,72.8,70.2,75.4,5.2
+S02000587,Darnley East,71.9,69.4,74.5,5.1
+S02000588,Glenwood North,64.7,62.4,67,4.6
+S02000589,Castlemilk,71.9,69.6,74.1,4.5
+S02000590,Darnley North,70.6,68.1,73,5
+S02000591,Carmunnock North,76.5,73.5,79.4,5.9
+S02000592,Carnwadric West,67.8,65,70.5,5.5
+S02000593,Muirend and Old Cathcart,75.6,73.2,78.1,4.9
+S02000594,Carnwadric East,77.5,75.6,79.4,3.8
+S02000595,Kingspark South,77.4,74.6,80.3,5.7
+S02000596,Newlands,74.5,72.2,76.8,4.7
+S02000597,Nitshill,68.8,66.2,71.3,5.1
+S02000598,Merrylee and Millbrae,76.7,73.7,79.7,6
+S02000599,Cathcart,74.3,71.8,76.8,5
+S02000600,Kingspark North,72.4,69.4,75.4,6.1
+S02000601,Crookston South,67.7,64.6,70.7,6.1
+S02000602,Pollokshaws,69.1,67,71.2,4.2
+S02000603,Mount Florida,72.7,69.9,75.4,5.5
+S02000604,Langside,73.9,71.5,76.4,4.9
+S02000605,Shawlands East,75.5,72.2,78.9,6.7
+S02000606,Crookston North,66.5,62.6,70.5,7.9
+S02000607,Battlefield,71.2,68.8,73.6,4.8
+S02000608,Pollok South and West,75.5,73.2,77.7,4.5
+S02000609,Shawlands West,72.2,69.3,75.1,5.8
+S02000610,Toryglen and Oatlands,72.4,70.2,74.6,4.4
+S02000611,Shettleston South,74.1,71.8,76.4,4.6
+S02000612,Maxwell Park,78.4,76.5,80.3,3.8
+S02000613,Carmyle and Mount Vernon South,73.3,70.5,76,5.4
+S02000614,Strathbungo,73.9,71.4,76.3,4.9
+S02000615,Govanhill East and Aikenhead,69.2,66.2,72.3,6.2
+S02000616,Govanhill West,72.3,69.9,74.7,4.8
+S02000617,Pollok North and East,68.4,65.6,71.2,5.6
+S02000618,Baillieston East,71.9,69.6,74.2,4.6
+S02000619,Dalmarnock,65.9,63.1,68.6,5.5
+S02000620,Braidfauld,67.9,65.2,70.7,5.5
+S02000621,Mosspark,74.8,73,76.6,3.7
+S02000622,Pollokshields East,72.5,69.5,75.5,6
+S02000623,Mount Vernon North and Sandyhills,78.5,76.5,80.5,4
+S02000624,Pollokshields West,77.6,75.2,80,4.8
+S02000625,Cardonald South and East,70.5,68.1,73,5
+S02000626,Baillieston West,71.4,68.8,74,5.2
+S02000627,Cardonald West and Central,75.3,72.9,77.7,4.8
+S02000628,Gorbals and Hutchesontown,65.5,63.3,67.8,4.5
+S02000629,Parkhead East and Braidfauld North,67.5,63.8,71.1,7.3
+S02000630,Tollcross,68.1,65.6,70.6,5.1
+S02000631,Kingston West and Dumbreck,70.9,68,73.7,5.7
+S02000632,Shettleston North,69.6,67.4,71.9,4.6
+S02000633,Parkhead West and Barrowfield,62.5,60.3,64.7,4.4
+S02000634,Laurieston and Tradeston,69.6,66.7,72.6,5.9
+S02000635,"Calton, Galllowgate and Bridgeton",68.3,66.4,70.3,3.9
+S02000636,Garrowhill West,76.1,73.1,79,5.9
+S02000637,Cardonald North,72.7,69.8,75.6,5.7
+S02000638,Craigton,68.3,65.3,71.4,6.2
+S02000639,Hillington,72.7,69.8,75.5,5.7
+S02000640,Greenfield,70.2,68,72.4,4.4
+S02000641,Penilee,68.6,66,71.2,5.2
+S02000642,Kinning Park and Festival Park,70.8,68.4,73.1,4.8
+S02000643,Old Shettleston and Parkhead North,66.9,63.8,69.9,6.1
+S02000644,Ibrox East and Cessnock,68,65.6,70.5,4.9
+S02000645,Garrowhill East and Swinton,79.3,76.1,82.5,6.5
+S02000646,Barlanark,72.2,69,75.4,6.4
+S02000647,Gallowgate North and Bellgrove,63.9,60.8,66.9,6.1
+S02000648,Carntyne West and Haghill,66.2,63.9,68.6,4.7
+S02000649,Ibrox,67.3,64.5,70.1,5.6
+S02000650,Dennistoun,72.6,68.9,76.3,7.3
+S02000651,Anderston,74.7,71.5,77.9,6.4
+S02000652,North Barlanark and Easterhouse South,66.7,63.5,70,6.5
+S02000653,Easterhouse East,68,64.6,71.4,6.8
+S02000654,"Cranhill, Lightburn and Queenslie South",69.5,67.1,71.9,4.8
+S02000655,City Centre West,71.1,68.3,74,5.8
+S02000656,Govan and Linthouse,66,64,67.9,3.9
+S02000657,Carntyne,68.8,64.9,72.7,7.8
+S02000658,City Centre East,67.4,65.5,69.3,3.8
+S02000659,Dennistoun North and Alexandra Parade,70.8,68.8,72.8,4
+S02000660,Drumoyne and Shieldhall,65.3,62.7,67.8,5
+S02000661,Finnieston and Kelvinhaugh,71.1,66.4,75.8,9.4
+S02000662,Central Easterhouse,65.5,62,69.1,7.2
+S02000663,Craigend and Ruchazie,67.1,64.6,69.7,5.2
+S02000664,Hillhead,72.5,70.5,74.5,4
+S02000665,Woodlands,73.8,70.4,77.2,6.8
+S02000666,"Roystonhill, Blochairn, and Provanmill",64.4,62.2,66.7,4.5
+S02000667,Riddrie and Hogganfield,70.4,68,72.8,4.7
+S02000668,Glasgow Harbour and  Partick South,70.2,67.5,73,5.5
+S02000669,Woodside,66.1,61.7,70.5,8.8
+S02000670,Sighthill,69.5,66.5,72.5,6
+S02000671,Partick,71.3,68.1,74.5,6.4
+S02000672,Kelvingrove and University,76,73.4,78.6,5.3
+S02000673,Whiteinch,70.9,67.9,73.9,6
+S02000674,"Garthamlock, Auchinlea and Gartloch",69.6,66.7,72.4,5.7
+S02000675,Firhill,69.9,67.7,72.1,4.5
+S02000676,Cowlairs and Port Dundas,69.2,67.1,71.4,4.4
+S02000677,Partickhill and Hyndland,78.5,75.6,81.3,5.8
+S02000678,Blackhill and Barmulloch East,67.1,64,70.1,6.1
+S02000679,Broomhill,76.5,73.9,79.2,5.4
+S02000680,Petershill,71.2,68.8,73.5,4.7
+S02000681,Dowanhill,80,77.5,82.5,5
+S02000682,Victoria Park,77.7,75.1,80.2,5.1
+S02000683,North Kelvin,78.8,75.7,81.8,6.1
+S02000684,Scotstoun South and West,69.2,66.4,72,5.6
+S02000685,Keppochhill,65.5,63.1,67.9,4.8
+S02000686,Scotstoun North and East,75.2,72.7,77.8,5.1
+S02000687,Barmulloch,68,64.5,71.5,6.9
+S02000688,Ruchill,70.9,68.2,73.7,5.4
+S02000689,Kelvinside and Jordanhill,78.8,77.2,80.4,3.2
+S02000690,Kelvindale,77.9,76,79.7,3.7
+S02000691,Springburn,66.4,64,68.9,4.8
+S02000692,Possil Park,64.5,61.8,67.1,5.3
+S02000693,Wyndford,67.4,64.6,70.2,5.7
+S02000694,Springburn East and Cowlairs,68.8,66.1,71.5,5.4
+S02000695,Robroyston and Millerston,76.4,74.2,78.5,4.3
+S02000696,Yoker South,73.1,69.7,76.6,6.9
+S02000697,Balornock,69.3,66,72.7,6.6
+S02000698,Knightswood Park East,73.1,70.4,75.8,5.4
+S02000699,Knightswood East,70.4,68.1,72.7,4.6
+S02000700,Maryhill West,67.8,63.7,71.8,8.1
+S02000701,Milton West,68.4,65.4,71.5,6.2
+S02000702,Anniesland East,75.9,73.7,78.1,4.4
+S02000703,Knightswood West,72.9,69.8,76,6.2
+S02000704,Maryhill East,68.1,64.6,71.6,7.1
+S02000705,Anniesland West,72.5,70.1,75,4.9
+S02000706,Knightswood Park West,70.7,67.8,73.7,5.9
+S02000707,Yoker North,70.2,67.6,72.7,5.1
+S02000708,Milton East,68.9,65.5,72.3,6.8
+S02000709,Blairdardie East,70.3,68.3,72.4,4.1
+S02000710,Summerston North,71.6,69.3,73.9,4.7
+S02000711,Blairdardie West,74.5,71.4,77.5,6.1
+S02000712,Drumchapel South,67.7,64.7,70.8,6.1
+S02000713,Summerston Central and West,72.3,69.2,75.3,6
+S02000714,Drumry West,71.1,68,74.1,6.1
+S02000715,Drumchapel North,74.7,69.4,79.9,10.4
+S02000716,Drumry East,67.5,63.8,71.2,7.4

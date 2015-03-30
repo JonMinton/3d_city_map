@@ -1,6 +1,6 @@
 rm(list=ls())
 
-# Prepare data for adding to qgis
+# Prepare data
 require(repmis)
 require(dplyr)
 require(stringr)
@@ -60,5 +60,19 @@ write.csv(lt_rel_avg,
           row.names=F
 )
 
-# life expectancy at birth
+# percentage of children in poverty?
 
+data_chpov <- source_DropboxData(
+    file="children_in_low_income_househol.csv",
+    key="wigibl94qcg0q0b"
+) %>% tbl_df()
+
+chpov_2010 <- data_chpov %>%
+    filter(year==2010) %>%
+    rename(child_pov_pc=CS.CHILD_POV_R) %>%
+    select(-year)
+
+write.csv(chpov_2010,
+          file="data/attributes/percent_children_in_poverty_2010.csv", 
+          row.names=F
+)

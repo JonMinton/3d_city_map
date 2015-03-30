@@ -322,3 +322,92 @@ surface3d(x=1:nrow(btmp), y=1:ncol(btmp), z=btmp*100, col="lightgrey")
 dir.create("stls")
 r2stl(x=1:nrow(btmp), y=1:ncol(btmp), z=btmp, z.expand=T, file="stls/simd_rank.stl")
 
+# Child Poverty -------------------------------------------------------
+
+
+child_pov <- read.csv("data/attributes/percent_children_in_poverty_2010.csv", header=T) %>%
+    tbl_df 
+
+
+dz_to_la <- read.csv("data/la_to_dz.csv", header=T) %>%
+    tbl_df
+
+dzs_in_gcity <- dz_to_la %>%
+    filter(local_authority=="Glasgow City") 
+
+
+dz_simd_gcity <- child_pov %>%
+    inner_join(dzs_in_gcity) %>%
+    select(datazone, child_pov_pc)
+
+
+rgdal::ogrInfo("data/shapefiles/scotland_2001_datazones", "scotland_dz_2001")
+scot_2001_dz_shp <- rgdal::readOGR(
+    "data/shapefiles/scotland_2001_datazones", "scotland_dz_2001"
+)
+
+
+glas_2001_dz_shp <- scot_2001_dz_shp[scot_2001_dz_shp$zonecode %in% dzs_in_gcity$datazone,] 
+
+# attach house prices
+glas_2001_dz_shp@data <- merge(glas_2001_dz_shp@data, dz_simd_gcity, by.x="zonecode", by.y="datazone")
+glas_2001_dz_shp@data <- glas_2001_dz_shp@data[c("zonecode", "gid","ons_code", "label", "child_pov_pc")]
+
+
+spplot(glas_2001_dz_shp, "child_pov_pc",
+       col.regions=rev(gray(seq(0, 1, 0.01))),
+       col=NA,
+       colorkey=FALSE,
+       par.settings = list(axis.line = list(col = 'transparent'))
+)
+
+# Now to go back and use code for extracting road network
+scotland_road <- rgdal::readOGR(    
+    "data/shapefiles/scotland-roads-shape", "roads"
+)
+
+# transform projection system
+
+scotland_road_reprojected <- spTransform(scotland_road, CRS(proj4string(glas_2001_dz_shp)))
+# Robin Lovelace function
+
+gClip <- function(shp, bb){
+    if(class(bb) == "matrix") b_poly <- as(extent(as.vector(t(bb))), "SpatialPolygons")
+    else b_poly <- as(extent(bb), "SpatialPolygons")
+    gIntersection(shp, b_poly, byid = T)
+}
+
+
+scotland_road_reprojected_clipped <- gClip(shp=scotland_road_reprojected, bb=bbox(glas_2001_dz_shp))
+
+# trying to add as layer within spplot
+
+bmp("bitmaps/child_poverty_2010_glasgow.bmp", height=1000, width=1310)
+spplot(glas_2001_dz_shp, "child_pov_pc",
+       col.regions=rev(gray(seq(0, 0.95, 0.01))),
+       col=NA,
+       colorkey=FALSE,
+       par.settings = list(
+           axis.line = list(col = 'transparent'),
+           panel.background=list(col=gray(0.95))
+       )
+) + latticeExtra::layer(
+    sp.lines(scotland_road_reprojected_clipped, col = "white", alpha=0.1) 
+)
+dev.off()    
+
+
+btmp <- read.bitmap(f="bitmaps/child_poverty_2010_glasgow.bmp")
+btmp <- btmp / max(btmp)
+btmp <- 1 - btmp
+
+# this removes the edges 
+rows_are_zero <- apply(btmp, 1, function(x) sum(x)==0)
+cols_are_zero <- apply(btmp, 2, function(x) sum(x)==0)
+btmp <- btmp[!rows_are_zero,!cols_are_zero]
+
+surface3d(x=1:nrow(btmp), y=1:ncol(btmp), z=btmp*100, col="lightgrey")
+
+#persp3d(btmp, col="grey", zlim=c(0,1))
+dir.create("stls")
+r2stl(x=1:nrow(btmp), y=1:ncol(btmp), z=btmp, z.expand=T, file="stls/child_pov_2010.stl")

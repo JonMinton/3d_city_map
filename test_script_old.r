@@ -91,7 +91,7 @@ scotland_road_reprojected_clipped <- gClip(shp=scotland_road_reprojected, bb=bbo
 # trying to add as layer within spplot
 
 bmp("bitmaps/hprice_2005_2010_glasgow.bmp", height=1000, width=1310)
-spplot(glas_2001_dz_shp, "hprice",
+spplot(glas_2001_dz_shp, "hrank",
        col.regions=rev(gray(seq(0, 0.95, 0.01))),
        col=NA,
        colorkey=FALSE,
@@ -109,7 +109,17 @@ btmp <- read.bitmap(f="bitmaps/hprice_2005_2010_glasgow.bmp")
 btmp <- btmp / max(btmp)
 btmp <- 1 - btmp
 
+# this removes the edges 
+rows_are_zero <- apply(btmp, 1, function(x) sum(x)==0)
+cols_are_zero <- apply(btmp, 2, function(x) sum(x)==0)
+btmp <- btmp[!rows_are_zero,!cols_are_zero]
+
 surface3d(x=1:nrow(btmp), y=1:ncol(btmp), z=btmp*100, col="lightgrey")
+
+#persp3d(btmp, col="grey", zlim=c(0,1))
+dir.create("stls")
+r2stl(x=1:nrow(btmp), y=1:ncol(btmp), z=btmp, z.expand=T, file="stls/hprice_rank_2005_2010.stl")
+
 
 
 

@@ -519,7 +519,6 @@ dir.create("stls")
 r2stl(x=1:nrow(btmp), y=1:ncol(btmp), z=btmp, z.expand=T, file="stls/e0_male_intermed.stl")
 
 
-#  Quick query from Gwilym  -----------------------------------------------
 
 
 # Script for extracting centroids from points
@@ -562,6 +561,9 @@ require(readbitmap)
 # house prices by datazone
 #roads 
 # buildings 
+
+
+#  Quick query from Gwilym  -----------------------------------------------
 
 # Need to look at the local authority of glasgow
 

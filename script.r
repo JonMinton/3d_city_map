@@ -518,3 +518,67 @@ surface3d(x=1:nrow(btmp), y=1:ncol(btmp), z=btmp*100, col="lightgrey")
 dir.create("stls")
 r2stl(x=1:nrow(btmp), y=1:ncol(btmp), z=btmp, z.expand=T, file="stls/e0_male_intermed.stl")
 
+
+#  Quick query from Gwilym  -----------------------------------------------
+
+
+# Script for extracting centroids from points
+rm(list=ls())
+
+# Example from:
+#http://gis.stackexchange.com/questions/43543/how-to-calculate-polygon-centroids-in-r-for-non-contiguous-shapes
+
+#install.packages("GISTools")
+#require(GISTools)
+require(rgdal)
+require(plyr)
+require(tidyr)
+require(rgl)
+require(fBasics)
+require(raster)
+require(rgeos)
+
+require(akima)
+require(dplyr)
+require(r2stl)
+require(readbitmap)
+require(lattice)
+require(latticeExtra)
+require(readbitmap)
+# 19-3-2015
+
+# The aim now is to simply produce a series of greyscale images on the same scale, 
+# each of a different attribute. There should be no need for interpolation, simply generate 
+# the greyscale images, save them as high resolution bitmaps of the same 
+# resolution, and then manually merge these files to produce the stl files
+
+
+# bitmap image approach ---------------------------------------------------
+
+
+# The data required are:
+
+#datazones within Glasgow
+# house prices by datazone
+#roads 
+# buildings 
+
+# Need to look at the local authority of glasgow
+
+dz_to_la <- read.csv("data/la_to_dz.csv", header=T) %>%
+    tbl_df
+
+dzs_in_gcity <- dz_to_la %>%
+    filter(local_authority=="Glasgow City") 
+
+other_links <- read.csv("data/latestpcinfowithlinkpc.csv", header=T) %>%
+    tbl_df
+
+file_for_gwilym <- other_links %>%
+    select(postcode=PC8, easting=Grid_Reference_Easting, 
+           northing=Grid_Reference_Northing, datazone=Datazone) %>%
+    right_join(dzs_in_gcity) %>%
+    select(postcode, x=easting, y=northing, datazone)
+
+file_for_gwilym %>%
+    write.csv(., file="data/postcode_link_for_gwilym.csv", row.names=F)

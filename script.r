@@ -584,3 +584,105 @@ file_for_gwilym <- other_links %>%
 
 file_for_gwilym %>%
     write.csv(., file="data/postcode_link_for_gwilym.csv", row.names=F)
+
+
+# Quality Adjusted House Price Surface from Gwilym ------------------------
+
+
+
+const_hp <- read.csv("data/attributes/house_price_quality_adjusted/CQP_2007q3_predicted___collapsed_to_datazone_median.csv") %>%
+    tbl_df 
+
+dz_to_la <- read.csv("data/la_to_dz.csv", header=T) %>%
+    tbl_df
+
+dzs_in_gcity <- dz_to_la %>%
+    filter(local_authority=="Glasgow City") 
+
+
+dz_hp_gcity <- const_hp %>%
+    inner_join(dzs_in_gcity)%>%
+    select(datazone, sellingp) %>%
+    unique
+
+rgdal::ogrInfo("data/shapefiles/scotland_2001_datazones", "scotland_dz_2001")
+scot_2001_dz_shp <- rgdal::readOGR(
+    "data/shapefiles/scotland_2001_datazones", "scotland_dz_2001"
+)
+
+# Borrowing from
+# http://stackoverflow.com/questions/3650636/how-to-attach-a-simple-data-frame-to-a-spatialpolygondataframe-in-r
+
+df <- const_hp
+df$datazone <- as.character(df$datazone)
+
+sp <- scot_2001_dz_shp
+sp$zonecode <- as.character(sp$zonecode)
+sp@data$zonecode <- as.character(sp@data$zonecode)
+
+#sp@data <- data.frame(sp@data, df[match(sp@data[,"zonecode"], df[,"datazone"]),])
+
+sp <- sp[sp$zonecode %in% df$datazone,] 
+
+# attach house prices
+sp@data <- merge(sp@data, const_hp, by.x="zonecode", by.y="datazone")
+sp@data <- sp@data[c("zonecode", "gid", "label", "sellingp")]
+
+
+spplot(sp, "sellingp",
+       col.regions=rev(gray(seq(0, 1, 0.01))),
+       col=NA,
+       colorkey=FALSE,
+       par.settings = list(axis.line = list(col = 'transparent'))
+)
+
+# Now to go back and use code for extracting road network
+scotland_road <- rgdal::readOGR(    
+    "data/shapefiles/scotland-roads-shape", "roads"
+)
+
+# transform projection system
+
+scotland_road_reprojected <- spTransform(scotland_road, CRS(proj4string(sp)))
+# Robin Lovelace function
+
+gClip <- function(shp, bb){
+    if(class(bb) == "matrix") b_poly <- as(extent(as.vector(t(bb))), "SpatialPolygons")
+    else b_poly <- as(extent(bb), "SpatialPolygons")
+    gIntersection(shp, b_poly, byid = T)
+}
+
+
+scotland_road_reprojected_clipped <- gClip(shp=scotland_road_reprojected, bb=bbox(sp))
+
+# trying to add as layer within spplot
+
+bmp("bitmaps/const_hp_2007.bmp", height=1000, width=1310)
+spplot(sp, "sellingp",
+       col.regions=rev(gray(seq(0, 0.95, 0.01))),
+       col=NA,
+       colorkey=FALSE,
+       par.settings = list(
+           axis.line = list(col = 'transparent'),
+           panel.background=list(col=gray(0.95))
+       )
+) + latticeExtra::layer(
+    sp.lines(scotland_road_reprojected_clipped, col = "white", alpha=0.1) 
+)
+dev.off()    
+
+
+btmp <- read.bitmap(f="bitmaps/const_hp_2007.bmp")
+btmp <- btmp / max(btmp)
+btmp <- 1 - btmp
+
+# this removes the edges 
+rows_are_zero <- apply(btmp, 1, function(x) sum(x)==0)
+cols_are_zero <- apply(btmp, 2, function(x) sum(x)==0)
+btmp <- btmp[!rows_are_zero,!cols_are_zero]
+
+surface3d(x=1:nrow(btmp), y=1:ncol(btmp), z=btmp*100, col="lightgrey")
+
+dir.create("stls")
+r2stl(x=1:nrow(btmp), y=1:ncol(btmp), z=btmp, z.expand=T, file="stls/const_hp_2007_dz.stl")
+

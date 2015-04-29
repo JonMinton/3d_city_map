@@ -686,3 +686,31 @@ surface3d(x=1:nrow(btmp), y=1:ncol(btmp), z=btmp*100, col="lightgrey")
 dir.create("stls")
 r2stl(x=1:nrow(btmp), y=1:ncol(btmp), z=btmp, z.expand=T, file="stls/const_hp_2007_dz.stl")
 
+
+
+
+# Identify locations of intermediate geographies --------------------------
+
+dz_to_la <- read.csv("data/la_to_dz.csv", header=T) %>%
+    tbl_df
+
+dzs_in_gcity <- dz_to_la %>%
+    filter(local_authority=="Glasgow City") 
+
+big_link <- read.csv("data/latestpcinfowithlinkpc.csv") %>%
+    tbl_df
+
+dz_ig_link <- big_link %>% 
+    select(datazone=Datazone, intermed=Intermed)
+rm(big_link)
+
+igs_in_gcity <- dzs_in_gcity %>%
+    left_join(dz_ig_link) 
+
+
+scot_2001_ig_shp <- rgdal::readOGR(
+    "data/shapefiles/scotland_2001_intermed", "scotland_igeog_2001"
+)
+
+
+glas_2001_ig_shp <- scot_2001_ig_shp[scot_2001_ig_shp$zonecode %in% igs_in_gcity$intermed,] 

@@ -714,3 +714,194 @@ scot_2001_ig_shp <- rgdal::readOGR(
 
 
 glas_2001_ig_shp <- scot_2001_ig_shp[scot_2001_ig_shp$zonecode %in% igs_in_gcity$intermed,] 
+
+
+
+# GWR Houseprice surface data ---------------------------------------------
+
+#data
+dz_to_la <- read.csv("data/la_to_dz.csv", header=T) %>%
+    tbl_df
+
+dzs_in_gcity <- dz_to_la %>%
+    filter(local_authority=="Glasgow City") 
+
+dz_hprices <- read.csv("data/attributes/house_price_quality_adjusted/Mediandatazonelevelconstantqualityhouseprice.csv") %>%
+    tbl_df
+
+
+dz_hprices <- dz_hprices  %>% 
+    gather(key=year, value=price, -datazone)  %>% 
+    mutate(year=str_replace(year, ".price", ""))  %>% 
+    separate(col=year, into=c("year", "qtr"), sep="Q")  %>% 
+    mutate(year=as.numeric(str_replace(year, "Y", "")), qtr=as.numeric(qtr))
+
+hp_inf <- read.csv("data/attributes/scot_hprice_inflation.csv") %>%
+    tbl_df
+
+hp_inf <- hp_inf  %>% 
+    select(year=Year, inflation=scot_avg)  %>% 
+    mutate(inflation = as.numeric(str_replace(inflation, ",", "")))   %>% 
+    mutate(index=inflation/inflation[year==2005])
+
+hp_avg <- dz_hprices   %>% 
+    group_by(datazone, year)  %>% 
+    summarise(price=mean(price))  %>% 
+    left_join(hp_inf)  %>% 
+    select(-inflation)  %>% 
+    ungroup  %>% 
+    mutate(hp_adjust=price*index)  %>% 
+    group_by(datazone)  %>% 
+    summarise(hprice = mean(hp_adjust))
+
+
+scot_2001_dz_shp <- rgdal::readOGR(
+    "data/shapefiles/scotland_2001_datazones", "scotland_dz_2001"
+)
+
+glas_2001_dz_shp <- scot_2001_dz_shp[scot_2001_dz_shp$zonecode %in% dzs_in_gcity$datazone,] 
+
+# attach house prices
+glas_2001_dz_shp@data <- merge(glas_2001_dz_shp@data, hp_avg, by.x="zonecode", by.y="datazone")
+glas_2001_dz_shp@data <- glas_2001_dz_shp@data[c("zonecode", "gid","ons_code", "label", "hprice")]
+
+# Now to go back and use code for extracting road network
+scotland_road <- rgdal::readOGR(    
+    "data/shapefiles/scotland-roads-shape", "roads"
+)
+
+# transform projection system
+
+scotland_road_reprojected <- spTransform(scotland_road, CRS(proj4string(glas_2001_dz_shp)))
+# Robin Lovelace function
+
+gClip <- function(shp, bb){
+    if(class(bb) == "matrix") b_poly <- as(extent(as.vector(t(bb))), "SpatialPolygons")
+    else b_poly <- as(extent(bb), "SpatialPolygons")
+    gIntersection(shp, b_poly, byid = T)
+}
+
+scotland_road_reprojected_clipped <- gClip(shp=scotland_road_reprojected, bb=bbox(glas_2001_dz_shp))
+
+# trying to add as layer within spplot
+
+bmp("bitmaps/quality_adjusted_houseprice_dz.bmp", height=1000, width=1310)
+spplot(glas_2001_dz_shp, "hprice",
+       col.regions=rev(gray(seq(0, 0.95, 0.01))),
+       col=NA,
+       colorkey=FALSE,
+       par.settings = list(
+           axis.line = list(col = 'transparent'),
+           panel.background=list(col=gray(0.95))
+       )
+) + latticeExtra::layer(
+    sp.lines(scotland_road_reprojected_clipped, col = "white", alpha=0.1) 
+)
+dev.off()    
+
+
+btmp <- read.bitmap(f="bitmaps/quality_adjusted_houseprice_dz.bmp")
+btmp <- btmp / max(btmp)
+btmp <- 1 - btmp
+
+# this removes the edges 
+rows_are_zero <- apply(btmp, 1, function(x) sum(x)==0)
+cols_are_zero <- apply(btmp, 2, function(x) sum(x)==0)
+btmp <- btmp[!rows_are_zero,!cols_are_zero]
+
+surface3d(x=1:nrow(btmp), y=1:ncol(btmp), z=btmp*100, col="lightgrey")
+
+
+
+r2stl(x=1:nrow(btmp), y=1:ncol(btmp), z=btmp, z.expand=T, file="stls/quality_adjusted_houseprice_dz.stl")
+
+
+# quality adjusted house prices - intermediate geographies ----------------
+
+
+
+dz_to_la <- read.csv("data/la_to_dz.csv", header=T) %>%
+    tbl_df
+
+dzs_in_gcity <- dz_to_la %>%
+    filter(local_authority=="Glasgow City") 
+
+big_link <- read.csv("data/latestpcinfowithlinkpc.csv") %>%
+    tbl_df
+
+dz_ig_link <- big_link %>% 
+    select(datazone=Datazone, intermed=Intermed)
+rm(big_link)
+
+igs_in_gcity <- dzs_in_gcity %>%
+    left_join(dz_ig_link) 
+
+hp_avg_ig <- hp_avg  %>% 
+    left_join(dz_ig_link)  %>% 
+    group_by(intermed)  %>% 
+    summarise(hprice=mean(hprice))  %>% 
+    ungroup
+
+scot_2001_ig_shp <- rgdal::readOGR(
+    "data/shapefiles/scotland_2001_intermed", "scotland_igeog_2001"
+)
+
+
+glas_2001_ig_shp <- scot_2001_ig_shp[scot_2001_ig_shp$zonecode %in% igs_in_gcity$intermed,] 
+
+# attach house prices
+glas_2001_ig_shp@data <- merge(glas_2001_ig_shp@data, hp_avg_ig, by.x="zonecode", by.y="intermed")
+glas_2001_ig_shp@data <- glas_2001_ig_shp@data[c("zonecode", "gid", "label", "hprice")]
+
+
+# Now to go back and use code for extracting road network
+scotland_road <- rgdal::readOGR(    
+    "data/shapefiles/scotland-roads-shape", "roads"
+)
+
+# transform projection system
+
+scotland_road_reprojected <- spTransform(scotland_road, CRS(proj4string(glas_2001_ig_shp)))
+# Robin Lovelace function
+
+gClip <- function(shp, bb){
+    if(class(bb) == "matrix") b_poly <- as(extent(as.vector(t(bb))), "SpatialPolygons")
+    else b_poly <- as(extent(bb), "SpatialPolygons")
+    gIntersection(shp, b_poly, byid = T)
+}
+
+scotland_road_reprojected_clipped <- gClip(shp=scotland_road_reprojected, bb=bbox(glas_2001_ig_shp))
+
+# trying to add as layer within spplot
+
+bmp("bitmaps/quality_adjusted_houseprice_ig.bmp", height=1000, width=1310)
+spplot(glas_2001_ig_shp, "hprice",
+       col.regions=rev(gray(seq(0, 0.95, 0.01))),
+       col=NA,
+       colorkey=FALSE,
+       par.settings = list(
+           axis.line = list(col = 'transparent'),
+           panel.background=list(col=gray(0.95))
+       )
+) + latticeExtra::layer(
+    sp.lines(scotland_road_reprojected_clipped, col = "white", alpha=0.1) 
+)
+dev.off()    
+
+
+btmp <- read.bitmap(f="bitmaps/quality_adjusted_houseprice_ig.bmp")
+btmp <- btmp / max(btmp)
+btmp <- 1 - btmp
+
+# this removes the edges 
+rows_are_zero <- apply(btmp, 1, function(x) sum(x)==0)
+cols_are_zero <- apply(btmp, 2, function(x) sum(x)==0)
+btmp <- btmp[!rows_are_zero,!cols_are_zero]
+
+surface3d(x=1:nrow(btmp), y=1:ncol(btmp), z=btmp*100, col="lightgrey")
+
+
+
+r2stl(x=1:nrow(btmp), y=1:ncol(btmp), z=btmp, z.expand=T, file="stls/quality_adjusted_houseprice_ig.stl")
+
+

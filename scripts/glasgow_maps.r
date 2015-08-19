@@ -1,7 +1,5 @@
 rm(list=ls())
 
-
-require(readr)
 require(rgdal)
 require(plyr)
 require(tidyr)
@@ -41,8 +39,8 @@ require(ggmap)
 # source: https://data.glasgow.gov.uk/dataset/life-expectancy-figures-in-males/
 # resource/c452a10e-c03a-443c-ad8e-2881862830b5
 
-male_le <- read_csv("data/attributes/life-exp-males-2005-2009.csv")
-
+male_le <- read.csv("data/attributes/life-exp-males-2005-2009.csv") %>%
+    tbl_df 
 
 male_le <- male_le  %>% select(intermed=Intermediate.Geography.Code, e0_male=EOLAB)
 

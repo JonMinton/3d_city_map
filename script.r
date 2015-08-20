@@ -1,6 +1,8 @@
 rm(list=ls())
 
 
+require(repmis)
+
 require(readr)
 require(rgdal)
 require(plyr)
@@ -30,8 +32,23 @@ require(ggmap)
 # bitmap image approach ---------------------------------------------------
 
 
+# English cities 
 
 
+# I should use data I've already processed from UK migrant demography, and 
+# link data used elsewhere 
+
+
+# Life expectancy (From UK migrant demography data)
+
+la_demography <- read_csv("data/attributes/england_and_wales/england_la_count.csv")
+
+# Links to other aggregations
+
+area_links <- source_DropboxData(
+    
+    
+)
 # Life expectancy ---------------------------------------------------------
 
 
